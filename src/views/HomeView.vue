@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { reactive, computed } from 'vue'
 import { useFormatterStore } from '@/stores/formatter';
+import DownloadIcon from '@/assets/icons/download.vue';
 
 const store = useFormatterStore();
-const { inputBody, outputBody } = store 
+const { inputBody, outputBody, currentType } = store 
 
 
 function handleUserInput(event: InputEvent): void {
@@ -15,7 +16,8 @@ function handleUserInput(event: InputEvent): void {
 }
 
 function handleConvert(type: string) {
-  switch (type) {
+  store.currentType = type;
+   switch (type) {
     case 'csv':
       store.outputBody = store.convertJSONToCSV(store.inputBody);
       break;
@@ -23,8 +25,12 @@ function handleConvert(type: string) {
       store.outputBody = store.convertStringToJSON(store.inputBody);
       break;
     default:
-      text = "Looking forward to the Weekend";
+      store.outputBody = store.convertStringToJSON(store.inputBody);
   }
+}
+
+function handleFileExport() {
+  store.exportAsFile(store.outputBody, 'csvSxport.csv');
 }
 
 function updateLineNumbers() {
@@ -41,7 +47,9 @@ const inputLineNumbers = computed(() => {
 });
 
 const outputLineNumbers = computed(() => {
-  return store.outputBody.split('\n');
+  if (store.outputBody){
+    return store.outputBody.split('\n');
+  }
 });
 
 </script>
@@ -69,7 +77,10 @@ const outputLineNumbers = computed(() => {
       <button @click="handleConvert('json')">Convert to json</button>
     </div>
     <div class="output">
-      <h3>Output</h3>
+      <h3>
+        <span>Output</span>
+        <DownloadIcon @click="handleFileExport()" class="download-action"/>
+      </h3>
        <div class="textarea-container">
         <div class="line-numbers">
           <div v-for="(line, index) in outputLineNumbers" :key="index">{{ index + 1 }}</div>
@@ -91,6 +102,9 @@ const outputLineNumbers = computed(() => {
 }
 .input, .output {
   flex: 2;
+}
+output h3 {
+  display: flex;
 }
 textarea.numbered {
   padding-left: 35px;
@@ -131,5 +145,11 @@ textarea.numbered {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.download-action {
+  position: absolute;
+  right: 15px;
+  cursor: pointer;
 }
 </style>

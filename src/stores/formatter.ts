@@ -21,9 +21,28 @@ import { defineStore } from 'pinia';
 
 */
 
+type FormatData = {
+  inputBody: string;
+  outputBody: string;
+  fileName: string;
+  currentType: string;
+};
+
 export const useFormatterStore = defineStore('formatter', {
-  state: () => ({ inputBody: '', outputBody: '' }),
-  getters: {},
+  state: () => ({ 
+    inputBody: '',
+    outputBody: '' ,
+    fileName: '',
+    currentType: '',
+  }),
+  getters: {
+    getCurrentType(state: FormatData) {
+      return state.currentType;
+    },
+    getFileName(state: FormatData) {
+      return state.fileName;
+    },
+  },
   actions: {
     convertStringToJSON(jsonString: string) {
       try {
@@ -82,6 +101,18 @@ export const useFormatterStore = defineStore('formatter', {
       
       // Clean up the created URL object
       URL.revokeObjectURL(url);
+    },
+    updateFileName() {
+      switch (this.currentType) {
+        case 'csv':
+          this.fileName = 'newCsvExport.csv'
+          break;
+        case 'json':
+          this.fileName = 'newJsonExport.json'
+          break;
+        default:
+          this.fileName = 'newJsonExport.csv'
+      }
     }
   },
 })
